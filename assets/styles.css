@@ -1,98 +1,108 @@
 /* General Styles */
 .ptable {
-    font-family: 'Fjalla One', sans-serif;
-    margin: 20px;
-  }
-  
+  font-family: 'Fjalla One', sans-serif;
+  margin: 20px;
+  text-align: center;
+}
+
+.headin {
+  font-size: 36px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.headin span {
+  color: #4CAF50;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  background-color: #fff;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #333;
+  color: #fff;
+}
+
+tr.wpos {
+  background-color: #f9f9f9;
+}
+
+tr.pos {
+  background-color: #f2f2f2;
+}
+
+.editable-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.edit-btn {
+  padding: 6px 12px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#add-team-btn {
+  margin-bottom: 10px;
+  padding: 8px 16px;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
   table {
-    border-collapse: collapse;
-    width: 100%;
-    background-color: #fff;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    font-size: 14px;
   }
-  
+
   th, td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
+    padding: 8px;
   }
-  
-  th {
-    background-color: #333;
-    color: #fff;
-  }
-  
-  tr.wpos {
-    background-color: #f9f9f9;
-  }
-  
-  tr.pos {
-    background-color: #f2f2f2;
-  }
-  
-  .editable-input {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 5px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-  }
-  
-  .edit-btn {
-    padding: 6px 12px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-  }
-  
+
+  .editable-input,
+  .edit-btn,
   #add-team-btn {
-    margin-bottom: 10px;
-    padding: 8px 16px;
-    background-color: #333;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
+    font-size: 12px;
   }
-  
-  /* Responsive Styles */
-  @media (max-width: 768px) {
-    table {
-      font-size: 14px;
-    }
-  
-    th, td {
-      padding: 8px;
-    }
-  
-    .editable-input,
-    .edit-btn,
-    #add-team-btn {
-      font-size: 12px;
-    }
+}
+
+@media (max-width: 480px) {
+  table {
+    font-size: 12px;
   }
-  
-  @media (max-width: 480px) {
-    table {
-      font-size: 12px;
-    }
-  
-    th, td {
-      padding: 6px;
-    }
-  
-    .editable-input,
-    .edit-btn,
-    #add-team-btn {
-      font-size: 10px;
-    }
-  
-    #add-team-btn {
-      padding: 6px 12px;
-    }
+
+  th, td {
+    padding: 6px;
   }
+
+  .editable-input,
+  .edit-btn,
+  #add-team-btn {
+    font-size: 10px;
+  }
+
+  #add-team-btn {
+    padding: 6px 12px;
+  }
+}

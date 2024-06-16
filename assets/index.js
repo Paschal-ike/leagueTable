@@ -1,8 +1,11 @@
+// Get references to necessary elements
 const teamRows = document.getElementById('team-rows');
 const addTeamBtn = document.getElementById('add-team-btn');
 
+// Variable to keep track of the team count
 let teamCount = 1;
 
+// Function to create a new team row
 const createTeamRow = (teamName) => {
   const row = document.createElement('tr');
   row.classList.add('pos');
@@ -21,6 +24,7 @@ const createTeamRow = (teamName) => {
   return row;
 }
 
+// Function to sort the table based on points and goal difference
 const sortTable = () => {
   const rows = Array.from(teamRows.getElementsByTagName('tr'));
   rows.sort((a, b) => {
@@ -39,6 +43,7 @@ const sortTable = () => {
   });
 }
 
+// Function to update the points for a team row
 const updatePoints = (row) => {
   const gp = parseInt(row.getElementsByTagName('td')[2].getElementsByTagName('input')[0].value);
   const w = parseInt(row.getElementsByTagName('td')[3].getElementsByTagName('input')[0].value);
@@ -50,12 +55,14 @@ const updatePoints = (row) => {
   sortTable();
 }
 
+// Event listener for the "Add Team" button
 addTeamBtn.addEventListener('click', () => {
   const newRow = createTeamRow('New Team');
   teamRows.appendChild(newRow);
   initializeEditHandlers();
 });
 
+// Function to initialize edit handlers for input fields and buttons
 const initializeEditHandlers = () => {
   const editBtns = document.querySelectorAll('.edit-btn');
   const inputs = document.querySelectorAll('.editable-input');
@@ -65,6 +72,7 @@ const initializeEditHandlers = () => {
     const input = inputs[index];
     const originalValue = input.value;
 
+    // Event listener for the "Edit" button
     btn.addEventListener('click', () => {
       isEditing = !isEditing;
 
@@ -77,6 +85,7 @@ const initializeEditHandlers = () => {
       }
     });
 
+    // Event listener for input field losing focus
     input.addEventListener('blur', () => {
       if (isEditing) {
         isEditing = false;
@@ -85,6 +94,7 @@ const initializeEditHandlers = () => {
       }
     });
 
+    // Event listener for Enter key press in input field
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         if (isEditing) {
@@ -102,4 +112,5 @@ const initializeEditHandlers = () => {
   });
 }
 
+// Initialize the edit handlers for the initial table rows
 initializeEditHandlers();
