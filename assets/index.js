@@ -5,24 +5,22 @@ const addTeamBtn = document.getElementById('add-team-btn');
 // Variable to keep track of the team count
 let teamCount = 1;
 
-// Load data from localStorage on page load
-window.addEventListener('load', loadData);
-
 // Function to create a new team row
-const createTeamRow = (teamData) => {
+const createTeamRow = (teamData = {}) => {
   const row = document.createElement('tr');
   row.classList.add('pos');
   row.innerHTML = `
-    <td>${teamData.rank}</td>
-    <td><input type="text" class="editable-input" value="${teamData.team}"></td>
-    <td><input type="number" class="editable-input" value="${teamData.gp}"></td>
-    <td><input type="number" class="editable-input" value="${teamData.w}"></td>
-    <td><input type="number" class="editable-input" value="${teamData.d}"></td>
-    <td><input type="number" class="editable-input" value="${teamData.l}"></td>
-    <td><input type="number" class="editable-input" value="${teamData.gd}"></td>
-    <td>${teamData.pts}</td>
+    <td>${teamData.rank || teamCount}</td>
+    <td><input type="text" class="editable-input" value="${teamData.team || 'New Team'}"></td>
+    <td><input type="number" class="editable-input" value="${teamData.gp || 0}"></td>
+    <td><input type="number" class="editable-input" value="${teamData.w || 0}"></td>
+    <td><input type="number" class="editable-input" value="${teamData.d || 0}"></td>
+    <td><input type="number" class="editable-input" value="${teamData.l || 0}"></td>
+    <td><input type="number" class="editable-input" value="${teamData.gd || 0}"></td>
+    <td>${teamData.pts || 0}</td>
     <td><button class="edit-btn">Edit</button></td>
   `;
+  if (!teamData.rank) teamCount++;
   return row;
 }
 
@@ -45,7 +43,6 @@ const sortTable = () => {
     row.getElementsByTagName('td')[0].textContent = teamData.rank;
     teamRows.appendChild(row);
   });
-  saveData();
 }
 
 // Function to get team data from a table row
@@ -75,7 +72,7 @@ const updatePoints = (row) => {
 
 // Event listener for the "Add Team" button
 addTeamBtn.addEventListener('click', () => {
-  const newRow = createTeamRow({ team: 'New Team', gp: 0, w: 0, d: 0, l: 0, gd: 0, pts: 0 });
+  const newRow = createTeamRow({});
   teamRows.appendChild(newRow);
   initializeEditHandlers();
   saveData();
@@ -101,6 +98,7 @@ const initializeEditHandlers = () => {
       } else {
         btn.textContent = 'Edit';
         updatePoints(btn.parentNode.parentNode);
+        saveData();
       }
     });
 
@@ -110,6 +108,7 @@ const initializeEditHandlers = () => {
         isEditing = false;
         btn.textContent = 'Edit';
         updatePoints(btn.parentNode.parentNode);
+        saveData();
       }
     });
 
@@ -121,6 +120,7 @@ const initializeEditHandlers = () => {
           btn.textContent = 'Edit';
           input.blur();
           updatePoints(btn.parentNode.parentNode);
+          saveData();
         } else {
           isEditing = true;
           btn.textContent = 'Save';
@@ -131,26 +131,60 @@ const initializeEditHandlers = () => {
   });
 }
 
-// Function to save data to localStorage
+// Function to save data to the database.json file
 const saveData = () => {
   const rows = Array.from(teamRows.getElementsByTagName('tr'));
   const teamData = rows.map(row => getTeamData(row));
-  localStorage.setItem('leagueTable', JSON.stringify(teamData));
+
+  // Convert the team data to JSON and write it to the database.json file
+  const jsonData = JSON.stringify(teamData);
+  const fileBlob = new Blob([jsonData], { type: 'application/json' });
+  const fileUrl = URL.createObjectURL(fileBlob);
+
+  // Create a temporary anchor element to download the file
+  const downloadLink = document.createElement('a');
+  downloadLink.href = fileUrl;
+  downloadLink.download = 'database.json';
+  downloadLink.click();
+
+  // Clean up the temporary anchor element and file URL
+  URL.revokeObjectURL(fileUrl);
+  downloadLink.remove();
 }
 
-// Function to load data from localStorage
+// Function to load data from the database.json file
 const loadData = () => {
-  const storedData = localStorage.getItem('leagueTable');
-  if (storedData) {
-    const teamData = JSON.parse(storedData);
-    teamData.forEach(data => {
-      const row = createTeamRow(data);
-      teamRows.appendChild(row);
-      teamCount = data.rank + 1;
-    });
-    initializeEditHandlers();
+  // Check if the browser supports the FileReader API
+  if (typeof window.FileReader === 'undefined') {
+    console.error('This browser does not support the FileReader API.');
+    return;
   }
+
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = '.json';
+
+  fileInput.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const teamData = JSON.parse(reader.result);
+        teamData.forEach(data => {
+          const row = createTeamRow(data);
+          teamRows.appendChild(row);
+        });
+        initializeEditHandlers();
+      };
+      reader.readAsText(file);
+    }
+  });
+
+  fileInput.click();
 }
 
 // Initialize the edit handlers for the initial table rows
 initializeEditHandlers();
+
+// Load data from the database.json file
+loadData();
