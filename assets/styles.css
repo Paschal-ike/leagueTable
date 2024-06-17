@@ -49,6 +49,7 @@ th, td {
   border: 1px solid #ddd;
   padding: 10px;
   text-align: center;
+  word-break: break-word;
 }
 
 th {
@@ -62,6 +63,7 @@ button {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  margin: 5px 0;
 }
 
 button:hover {
@@ -69,12 +71,30 @@ button:hover {
 }
 
 @media (max-width: 600px) {
+  .week-control {
+      flex-direction: column;
+  }
+
+  #weekDisplay {
+      margin: 10px 0;
+  }
+
   th, td {
       padding: 5px;
   }
 
+  table {
+      display: block;
+      overflow-x: auto;
+  }
+
   button {
       width: 100%;
-      margin-bottom: 10px;
+      padding: 10px;
+      margin: 5px 0;
+  }
+
+  .container {
+      padding: 10px;
   }
 }

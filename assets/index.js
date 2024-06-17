@@ -120,3 +120,204 @@ function switchWeek() {
   teams = JSON.parse(localStorage.getItem(`teams_week_${currentWeek}`)) || [];
   updateTable();
 }
+
+// Generate a clean table view without action buttons
+// Generate a clean table view without action buttons
+// Generate a clean table view without action buttons
+// Generate a clean table view without action buttons
+function viewTable() {
+  let cleanTableHTML = `
+      <html>
+      <head>
+          <title>League Table - Week ${currentWeek}</title>
+          <style>
+              body {
+                  font-family: Arial, sans-serif;
+                  background-color: #f0f0f0;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  min-height: 100vh;
+                  padding: 20px;
+              }
+              .container {
+                  width: 100%;
+                  max-width: 800px;
+                  background: #fff;
+                  padding: 20px;
+                  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                  border-radius: 8px;
+              }
+              h1 {
+                  text-align: center;
+                  margin-bottom: 20px;
+              }
+              table {
+                  width: 100%;
+                  border-collapse: collapse;
+                  margin-bottom: 20px;
+              }
+              th, td {
+                  border: 1px solid #ddd;
+                  padding: 10px;
+                  text-align: center;
+              }
+              th {
+                  background-color: #f4f4f4;
+              }
+              button {
+                  display: block;
+                  width: 100%;
+                  padding: 10px 20px;
+                  background-color: #007bff;
+                  color: #fff;
+                  border: none;
+                  border-radius: 5px;
+                  cursor: pointer;
+                  text-align: center;
+              }
+              button:hover {
+                  background-color: #0056b3;
+              }
+              #canvasContainer {
+                  display: none;
+              }
+              @media (max-width: 600px) {
+                  table {
+                      display: block;
+                      overflow-x: auto;
+                  }
+                  th, td {
+                      padding: 5px;
+                  }
+                  .container {
+                      padding: 10px;
+                  }
+              }
+          </style>
+      </head>
+      <body>
+          <div class="container">
+              <h1>League Table - Week ${currentWeek}</h1>
+              <table id="leagueTableView">
+                  <thead>
+                      <tr>
+                          <th>Rank</th>
+                          <th>Team</th>
+                          <th>GP</th>
+                          <th>W</th>
+                          <th>D</th>
+                          <th>L</th>
+                          <th>GF</th>
+                          <th>GA</th>
+                          <th>GD</th>
+                          <th>Pts</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+  `;
+
+  teams.sort((a, b) => b.points - a.points || b.goalDifference - a.goalDifference).forEach((team, index) => {
+      cleanTableHTML += `
+          <tr>
+              <td>${index + 1}</td>
+              <td>${team.name}</td>
+              <td>${team.gamesPlayed}</td>
+              <td>${team.wins}</td>
+              <td>${team.draws}</td>
+              <td>${team.losses}</td>
+              <td>${team.goalsFor}</td>
+              <td>${team.goalsAgainst}</td>
+              <td>${team.goalDifference}</td>
+              <td>${team.points}</td>
+          </tr>
+      `;
+  });
+
+  cleanTableHTML += `
+                  </tbody>
+              </table>
+              <button onclick="downloadImage()">Download JPEG</button>
+              <div id="canvasContainer">
+                  <canvas id="tableCanvas"></canvas>
+              </div>
+          </div>
+          <script>
+              function downloadImage() {
+                  const table = document.getElementById('leagueTableView');
+                  const canvas = document.getElementById('tableCanvas');
+                  const ctx = canvas.getContext('2d');
+
+                  // Set canvas dimensions to match the table
+                  canvas.width = table.offsetWidth;
+                  canvas.height = table.offsetHeight;
+
+                  // Scale the context to match the device pixel ratio
+                  const scale = window.devicePixelRatio;
+                  canvas.width = table.offsetWidth * scale;
+                  canvas.height = table.offsetHeight * scale;
+                  ctx.scale(scale, scale);
+
+                  // Draw the table onto the canvas
+                  ctx.font = "16px Arial";
+                  ctx.fillStyle = "black";
+
+                  Array.from(table.rows).forEach((row, rowIndex) => {
+                      Array.from(row.cells).forEach((cell, cellIndex) => {
+                          const cellText = cell.innerText;
+                          const cellRect = cell.getBoundingClientRect();
+                          ctx.fillText(cellText, cellRect.left, cellRect.top + 20);
+                      });
+                  });
+
+                  // Convert the canvas to a data URL and trigger download
+                  const image = canvas.toDataURL("image/jpeg");
+                  const link = document.createElement('a');
+                  link.href = image;
+                  link.download = 'league_table.jpg';
+                  link.click();
+              }
+          </script>
+      </body>
+      </html>
+  `;
+
+  // Open a new window to display the clean table
+  const newWindow = window.open('', '_blank');
+  newWindow.document.write(cleanTableHTML);
+  newWindow.document.close();
+}
+
+
+
+ 
+
+
+// Function to download the table as a CSV file
+function downloadCSV() {
+  let csvContent = "data:text/csv;charset=utf-8,";
+  csvContent += "Rank,Team,GP,W,D,L,GF,GA,GD,Pts\n";
+  teams.sort((a, b) => b.points - a.points || b.goalDifference - a.goalDifference).forEach((team, index) => {
+      const row = [
+          index + 1,
+          team.name,
+          team.gamesPlayed,
+          team.wins,
+          team.draws,
+          team.losses,
+          team.goalsFor,
+          team.goalsAgainst,
+          team.goalDifference,
+          team.points
+      ].join(",");
+      csvContent += row + "\n";
+  });
+
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", `league_table_week_${currentWeek}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
