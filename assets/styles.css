@@ -1,116 +1,80 @@
-/* General Styles */
-.ptable {
-  font-family: 'Fjalla One', sans-serif;
-  margin: 20px;
-  text-align: center;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
 }
 
-.headin {
-  font-size: 36px;
-  color: #333;
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f0f0f0;
+}
+
+.container {
+  width: 100%;
+  max-width: 800px;
+  background: #fff;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+h1 {
+  text-align: center;
   margin-bottom: 20px;
 }
 
-.headin span {
-  color: #4CAF50;
+.week-control {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+#weekDisplay {
+  margin: 0 20px;
+  font-weight: bold;
 }
 
 table {
-  border-collapse: collapse;
   width: 100%;
-  background-color: #fff;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  border-collapse: collapse;
+  margin-bottom: 20px;
 }
 
 th, td {
-  padding: 12px 15px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
 }
 
 th {
-  background-color: #333;
+  background-color: #f4f4f4;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #007bff;
   color: #fff;
-}
-
-tr.wpos {
-  background-color: #f9f9f9;
-}
-
-tr.pos {
-  background-color: #f2f2f2;
-}
-
-.editable-input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 5px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.edit-btn {
-  padding: 6px 12px;
-  background-color: #4CAF50;
-  color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   cursor: pointer;
-  font-size: 14px;
 }
 
-/* Ensure the button is clickable */
-#add-team-btn {
-  display: inline-block; /* Ensures it behaves like a button */
-  margin-bottom: 10px;
-  padding: 8px 16px;
-  background-color: #333;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
+button:hover {
+  background-color: #0056b3;
 }
 
-/* Add hover effect for better UX */
-#add-team-btn:hover {
-  background-color: #555;
-}
-
-/* Responsive Styles */
-@media (max-width: 768px) {
-  table {
-    font-size: 14px;
-  }
-
+@media (max-width: 600px) {
   th, td {
-    padding: 8px;
+      padding: 5px;
   }
 
-  .editable-input,
-  .edit-btn,
-  #add-team-btn {
-    font-size: 12px;
-  }
-}
-
-@media (max-width: 480px) {
-  table {
-    font-size: 12px;
-  }
-
-  th, td {
-    padding: 6px;
-  }
-
-  .editable-input,
-  .edit-btn,
-  #add-team-btn {
-    font-size: 10px;
-  }
-
-  #add-team-btn {
-    padding: 6px 12px;
+  button {
+      width: 100%;
+      margin-bottom: 10px;
   }
 }

@@ -1,190 +1,122 @@
-// Get references to necessary elements
-const teamRows = document.getElementById('team-rows');
-const addTeamBtn = document.getElementById('add-team-btn');
-
-// Variable to keep track of the team count
-let teamCount = 1;
-
-// Function to create a new team row
-const createTeamRow = (teamData = {}) => {
-  const row = document.createElement('tr');
-  row.classList.add('pos');
-  row.innerHTML = `
-    <td>${teamData.rank || teamCount}</td>
-    <td><input type="text" class="editable-input" value="${teamData.team || 'New Team'}"></td>
-    <td><input type="number" class="editable-input" value="${teamData.gp || 0}"></td>
-    <td><input type="number" class="editable-input" value="${teamData.w || 0}"></td>
-    <td><input type="number" class="editable-input" value="${teamData.d || 0}"></td>
-    <td><input type="number" class="editable-input" value="${teamData.l || 0}"></td>
-    <td><input type="number" class="editable-input" value="${teamData.gd || 0}"></td>
-    <td>${teamData.pts || 0}</td>
-    <td><button class="edit-btn">Edit</button></td>
-  `;
-  if (!teamData.rank) teamCount++;
-  return row;
-}
-
-// Function to sort the table based on points and goal difference
-const sortTable = () => {
-  const rows = Array.from(teamRows.getElementsByTagName('tr'));
-  rows.sort((a, b) => {
-    const aPts = parseInt(a.getElementsByTagName('td')[7].textContent);
-    const bPts = parseInt(b.getElementsByTagName('td')[7].textContent);
-    if (aPts === bPts) {
-      const aGD = parseInt(a.getElementsByTagName('td')[6].getElementsByTagName('input')[0].value);
-      const bGD = parseInt(b.getElementsByTagName('td')[6].getElementsByTagName('input')[0].value);
-      return bGD - aGD;
-    }
-    return bPts - aPts;
-  });
-  rows.forEach((row, index) => {
-    const teamData = getTeamData(row);
-    teamData.rank = index + 1;
-    row.getElementsByTagName('td')[0].textContent = teamData.rank;
-    teamRows.appendChild(row);
-  });
-}
-
-// Function to get team data from a table row
-const getTeamData = (row) => {
-  const cells = row.getElementsByTagName('td');
-  const teamData = {
-    rank: parseInt(cells[0].textContent),
-    team: cells[1].getElementsByTagName('input')[0].value,
-    gp: parseInt(cells[2].getElementsByTagName('input')[0].value),
-    w: parseInt(cells[3].getElementsByTagName('input')[0].value),
-    d: parseInt(cells[4].getElementsByTagName('input')[0].value),
-    l: parseInt(cells[5].getElementsByTagName('input')[0].value),
-    gd: parseInt(cells[6].getElementsByTagName('input')[0].value),
-    pts: parseInt(cells[7].textContent)
-  };
-  return teamData;
-}
-
-// Function to update the points for a team row
-const updatePoints = (row) => {
-  const teamData = getTeamData(row);
-  const pts = teamData.w * 3 + teamData.d;
-  row.getElementsByTagName('td')[7].textContent = pts;
-  teamData.pts = pts;
-  sortTable();
-}
-
-// Event listener for the "Add Team" button
-addTeamBtn.addEventListener('click', () => {
-  const newRow = createTeamRow({});
-  teamRows.appendChild(newRow);
-  initializeEditHandlers();
-  saveData();
+// When the DOM content is fully loaded, initialize the league table
+document.addEventListener('DOMContentLoaded', (event) => {
+  initializeWeek();
+  loadTeams();
+  updateTable();
 });
 
-// Function to initialize edit handlers for input fields and buttons
-const initializeEditHandlers = () => {
-  const editBtns = document.querySelectorAll('.edit-btn');
-  const inputs = document.querySelectorAll('.editable-input');
+// Current week
+let currentWeek = 1;
 
-  editBtns.forEach((btn, index) => {
-    let isEditing = false;
-    const input = inputs[index];
-    const originalValue = input.value;
+// Initialize teams for the current week from localStorage or an empty array if no data is stored
+let teams = JSON.parse(localStorage.getItem(`teams_week_${currentWeek}`)) || [];
 
-    // Event listener for the "Edit" button
-    btn.addEventListener('click', () => {
-      isEditing = !isEditing;
+// Initialize the week number display
+function initializeWeek() {
+  const weekDisplay = document.getElementById('weekDisplay');
+  weekDisplay.textContent = `Week ${currentWeek}`;
+}
 
-      if (isEditing) {
-        input.focus();
-        btn.textContent = 'Save';
-      } else {
-        btn.textContent = 'Edit';
-        updatePoints(btn.parentNode.parentNode);
-        saveData();
-      }
-    });
-
-    // Event listener for input field losing focus
-    input.addEventListener('blur', () => {
-      if (isEditing) {
-        isEditing = false;
-        btn.textContent = 'Edit';
-        updatePoints(btn.parentNode.parentNode);
-        saveData();
-      }
-    });
-
-    // Event listener for Enter key press in input field
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        if (isEditing) {
-          isEditing = false;
-          btn.textContent = 'Edit';
-          input.blur();
-          updatePoints(btn.parentNode.parentNode);
-          saveData();
-        } else {
-          isEditing = true;
-          btn.textContent = 'Save';
-          input.focus();
-        }
-      }
-    });
+// Load teams from the array and display them in the table
+function loadTeams() {
+  const tbody = document.querySelector('#leagueTable tbody');
+  tbody.innerHTML = ''; // Clear the table body
+  // Sort teams by points and goal difference, and then populate the table
+  teams.sort((a, b) => b.points - a.points || b.goalDifference - a.goalDifference).forEach((team, index) => {
+      const row = document.createElement('tr'); // Create a new table row
+      // Populate the row with team data
+      row.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${team.name}</td>
+          <td>${team.gamesPlayed}</td>
+          <td>${team.wins}</td>
+          <td>${team.draws}</td>
+          <td>${team.losses}</td>
+          <td>${team.goalsFor}</td>
+          <td>${team.goalsAgainst}</td>
+          <td>${team.goalDifference}</td>
+          <td>${team.points}</td>
+          <td>
+              <button onclick="updateTeam('${team.name}')">Update</button>
+              <button onclick="removeTeam('${team.name}')">Remove</button>
+          </td>
+      `;
+      tbody.appendChild(row); // Add the row to the table body
   });
 }
 
-// Function to save data to the database.json file
-const saveData = () => {
-  const rows = Array.from(teamRows.getElementsByTagName('tr'));
-  const teamData = rows.map(row => getTeamData(row));
-
-  // Convert the team data to JSON and write it to the database.json file
-  const jsonData = JSON.stringify(teamData);
-  const fileBlob = new Blob([jsonData], { type: 'application/json' });
-  const fileUrl = URL.createObjectURL(fileBlob);
-
-  // Create a temporary anchor element to download the file
-  const downloadLink = document.createElement('a');
-  downloadLink.href = fileUrl;
-  downloadLink.download = 'database.json';
-  downloadLink.click();
-
-  // Clean up the temporary anchor element and file URL
-  URL.revokeObjectURL(fileUrl);
-  downloadLink.remove();
+// Save the current state of teams to localStorage and refresh the table
+function updateTable() {
+  localStorage.setItem(`teams_week_${currentWeek}`, JSON.stringify(teams)); // Save teams array to localStorage
+  loadTeams(); // Reload the table
 }
 
-// Function to load data from the database.json file
-const loadData = () => {
-  // Check if the browser supports the FileReader API
-  if (typeof window.FileReader === 'undefined') {
-    console.error('This browser does not support the FileReader API.');
-    return;
+// Add a new team to the league
+function addTeam() {
+  const teamName = prompt("Enter team name:"); // Prompt the user to enter a team name
+  // Check if the team name is valid and not already in the list
+  if (teamName && !teams.some(team => team.name === teamName)) {
+      // Add a new team object to the teams array
+      teams.push({ 
+          name: teamName, 
+          gamesPlayed: 0, 
+          wins: 0, 
+          draws: 0, 
+          losses: 0, 
+          goalsFor: 0, 
+          goalsAgainst: 0, 
+          goalDifference: 0, 
+          points: 0 
+      });
+      updateTable(); // Refresh the table
+  } else {
+      alert('Team already exists or invalid name!'); // Show an error if the team name is invalid or duplicate
   }
-
-  const fileInput = document.createElement('input');
-  fileInput.type = 'file';
-  fileInput.accept = '.json';
-
-  fileInput.addEventListener('change', (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const teamData = JSON.parse(reader.result);
-        teamData.forEach(data => {
-          const row = createTeamRow(data);
-          teamRows.appendChild(row);
-        });
-        initializeEditHandlers();
-      };
-      reader.readAsText(file);
-    }
-  });
-
-  fileInput.click();
 }
 
-// Initialize the edit handlers for the initial table rows
-initializeEditHandlers();
+// Update the stats for a specific team
+function updateTeam(teamName) {
+  const team = teams.find(team => team.name === teamName); // Find the team object
+  if (team) {
+      // Prompt the user to update each stat for the team
+      team.gamesPlayed = parseInt(prompt("Enter games played:", team.gamesPlayed));
+      team.wins = parseInt(prompt("Enter wins:", team.wins));
+      team.draws = parseInt(prompt("Enter draws:", team.draws));
+      team.losses = parseInt(prompt("Enter losses:", team.losses));
+      team.goalsFor = parseInt(prompt("Enter goals for:", team.goalsFor));
+      team.goalsAgainst = parseInt(prompt("Enter goals against:", team.goalsAgainst));
+      // Calculate the derived stats
+      team.goalDifference = team.goalsFor - team.goalsAgainst;
+      team.points = team.wins * 3 + team.draws;
+      updateTable(); // Refresh the table
+  } else {
+      alert('Team not found!'); // Show an error if the team is not found
+  }
+}
 
-// Load data from the database.json file
-loadData();
+// Remove a team from the league
+function removeTeam(teamName) {
+  teams = teams.filter(team => team.name !== teamName); // Filter out the team from the array
+  updateTable(); // Refresh the table
+}
+
+// Navigate to the previous week
+function prevWeek() {
+  if (currentWeek > 1) {
+      currentWeek--;
+      switchWeek();
+  }
+}
+
+// Navigate to the next week
+function nextWeek() {
+  currentWeek++;
+  switchWeek();
+}
+
+// Switch the current week and update the display and data
+function switchWeek() {
+  document.getElementById('weekDisplay').textContent = `Week ${currentWeek}`;
+  teams = JSON.parse(localStorage.getItem(`teams_week_${currentWeek}`)) || [];
+  updateTable();
+}
